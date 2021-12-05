@@ -1,4 +1,4 @@
-<?php print_r($data['message']); ?>
+<?php echo $data['message']; ?>
 <form action="<?php echo $data['action']; ?>" method="post">
     <label for="">
         your email

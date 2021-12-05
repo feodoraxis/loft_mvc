@@ -39,6 +39,7 @@ class Application
 //        $this->route->addRoute('/blog/remove', \App\Controller\Blog::class, 'Remove');
 //
         $this->route->addRoute('/user', \App\Controller\User::class, 'Index');
+        $this->route->addRoute('/user/', \App\Controller\User::class, 'Index');
         $this->route->addRoute('/user/auth', \App\Controller\User::class, 'Index');
         $this->route->addRoute('/user/registration', \App\Controller\User::class, 'Registration');
     }
@@ -58,7 +59,7 @@ class Application
     {
         $actionName = $this->route->getAction();
         if (!method_exists($this->controllerName, $actionName)) {
-            throw new RouteException('Action ' . $actionName . ' not found in ' . get_class($this->controllerName));
+            throw new Exception('Action ' . $actionName . ' not found in ' . get_class($this->controllerName));
         }
 
         $this->actionName = $actionName;
