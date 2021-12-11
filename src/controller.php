@@ -27,7 +27,6 @@ abstract class Controller
         try {
             $loader = new FilesystemLoader($this->view);
             $twig = new Environment($loader);
-//            $twig->setEscaper('html');
 
             return $twig->render($file_name . '.twig', $data);
         } catch (Exception | LoaderError | RuntimeError | SyntaxError $e) {
