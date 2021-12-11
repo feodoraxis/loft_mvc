@@ -1,6 +1,12 @@
 <?php
 namespace Base;
 
+use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
+use Twig\Loader\FilesystemLoader;
+
 abstract class Controller
 {
     protected $db;
@@ -18,11 +24,14 @@ abstract class Controller
 
     public function render(string $file_name, array $data = []): string
     {
-        ob_start();
-        require_once $this->view . $file_name;
-        ob_end_flush();
-        $output = ob_get_contents();
-        ob_end_clean();
-        return $output;
+        try {
+            $loader = new FilesystemLoader($this->view);
+            $twig = new Environment($loader);
+//            $twig->setEscaper('html');
+
+            return $twig->render($file_name . '.twig', $data);
+        } catch (Exception | LoaderError | RuntimeError | SyntaxError $e) {
+            return $e->getMessage();
+        }
     }
 }

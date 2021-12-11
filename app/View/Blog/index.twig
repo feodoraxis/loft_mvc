@@ -1,0 +1,14 @@
+{{ message }}
+
+<form action="{{ action }}" method="post">
+    <textarea name="message" id="" cols="30" rows="10"></textarea>
+    <input type="hidden" name="action" value="add">
+    <button>Send</button>
+</form>
+
+{% for item in list %}
+    <p>{{ item.text|raw }}</p>
+    <i>{{ item.author }}</i>
+    {{ item.actions|raw }}
+    <hr />
+{% endfor %}

@@ -33,7 +33,7 @@ class Blog extends Controller
         $data['list'] = $blogModel->getPosts();
 
 
-        return $this->render("index.php", $data);
+        return $this->render("index", $data);
 
     }
 

@@ -21,17 +21,17 @@ class User extends Controller
         if ($_SERVER['REQUEST_METHOD'] == 'POST' && !UserModel::isAuthorized()) {
             $data['message'] = $user_model->auth();
         }
-        return $this->render("auth.php", $data);
+        return $this->render("auth", $data);
     }
 
     public function Registration()
     {
-        $data = [ 'message' => '' , 'action' => $_SERVER['REQUEST_URI'] ];
+        $data = [ 'message' => '', 'text' => 'text', 'action' => $_SERVER['REQUEST_URI'] ];
         if ( $_SERVER['REQUEST_METHOD'] == 'POST' ) {
             $user_model = new UserModel();
             $data['message'] = $user_model->add();
         }
 
-        return $this->render("registration.php" , $data);
+        return $this->render("registration" , $data);
     }
 }

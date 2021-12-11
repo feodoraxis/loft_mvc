@@ -7,7 +7,6 @@ use Base\Model;
 
 class User extends Model
 {
-
     public function auth()
     {
         $user = $_POST['user'];
