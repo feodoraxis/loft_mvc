@@ -1,19 +1,39 @@
 <?php
 namespace App\Model;
 
-use Base\Db as DB;
+use Illuminate\Database\Eloquent\Model;
 use App\Model\User as UserModel;
-use http\Header;
 
-class Blog
+/**
+ * Class Blog
+ *
+ * @package App\Model
+ *
+ * @property-read $message
+ * @property-read $user_id
+ * @property-read $text
+ * @property-read $email
+ * @property-read $date
+ */
+class Blog extends Model
 {
+    protected $table = 'blog';
+    public $timestamps = false;
+
     public function getPosts()
     {
-        $DB = DB::getInstance();
-        $res = $DB->fetchAll(
-            "SELECT blog.id as post_id, blog.user_id, blog.text, users.id, users.name FROM `blog` INNER JOIN `users` ON blog.user_id = users.id ORDER BY blog.id DESC LIMIT 20",
-            []
-        );
+        $query = self::query()
+            ->join('users', 'users.id', '=', 'blog.user_id')
+            ->select("{$this->table}.*", "users.name")
+            ->limit(20)
+            ->orderBy('id', 'DESC')
+            ->get();
+
+        $res = [];
+        foreach ($query as $item) {
+            $res[] = $item->toArray();
+        }
+
 
         return array_map(function($item) {
             $output = [
@@ -24,8 +44,8 @@ class Blog
             if (UserModel::currentUserIsAdmin()) {
                 $output['actions'] = '<form method="post">
                                            <button>remove</button>
-                                           <input type="hidden" name="action" value="remove">
-                                           <input type="hidden" name="post_id" value="' . $item['post_id'] . '">
+                                            <input type="hidden" name="action" value="remove">
+                                           <input type="hidden" name="post_id" value="' . $item['id'] . '">
                                       </form>';
             } else {
                 $output['actions'] = '';
@@ -35,78 +55,65 @@ class Blog
         }, $res);
     }
 
-    public static function getUsersPosts(int $user_id)
-    {
-        $DB = DB::getInstance();
-        $res = $DB->fetchAll(
-            "SELECT blog.id as post_id, blog.user_id, blog.text, users.id, users.name FROM `blog` INNER JOIN `users` ON blog.user_id = users.id WHERE blog.user_id = :user_id ORDER BY blog.id DESC LIMIT 20",
-            [
-                ':user_id' => $user_id
-            ]
-        );
+     public static function getUsersPosts(int $user_id)
+     {
+         $query = self::query()
+            ->join('users', 'users.id', '=', 'blog.user_id')
+            ->select("blog.*", "users.name")
+            ->where('user_id', '=', $user_id)
+            ->limit(20)
+            ->orderBy('id', 'DESC')
+            ->get();
 
-        array_walk($res, function($item) {
-            $item = [
-                'text' => $item['text'],
-                'author' => $item['name'],
-                'post_id' => $item['post_id'],
-            ];
-        });
+         $res = [];
+         foreach ($query as $item) {
+             $res[] = $item->toArray();
+         }
 
-        return json_encode($res, JSON_UNESCAPED_UNICODE);
-    }
+         array_walk($res, function($item) {
+              $item = [
+                  'text' => $item['text'],
+                  'author' => $item['name'],
+                  'post_id' => $item['id'],
+              ];
+         });
 
-    public function remove()
-    {
-        if (!UserModel::currentUserIsAdmin()) {
-            return "You're can not remove posts";
-        }
+         return json_encode($res, JSON_UNESCAPED_UNICODE);
+     }
 
-        $post_id = intval($_POST['post_id']);
+     public function remove()
+     {
+         if (!UserModel::currentUserIsAdmin()) {
+             return "You're can not remove posts";
+         }
 
-        $DB = DB::getInstance();
-        $res = $DB->exec(
-            "DELETE FROM `blog` WHERE `id` = :post_id",
-            [
-                ':post_id' => $post_id,
-            ]
-        );
+         $post_id = intval($_POST['post_id']);
+         $res = self::destroy($post_id);
 
-        if ($res) {
-            Header("Location: /");
-        } else {
-            return $post_id;
-        }
-    }
+         if ($res) {
+             Header("Location: /");
+         } else {
+             return $post_id;
+         }
+     }
 
-    public function add()
-    {
-        if (empty($_POST['message'])) {
-            return "white some text";
-        }
+     public function add()
+     {
+         if (empty($_POST['message'])) {
+             return "white some text";
+         }
 
-        $message = nl2br($_POST['message']);
-        $user_id = UserModel::getCurrentUserId();
-        $DB = DB::getInstance();
+         $message = nl2br($_POST['message']);
+         $user_id = UserModel::getCurrentUserId();
 
-        $res = $DB->exec(
-            "INSERT INTO `blog` (`text`,`date`,`user_id`) VALUES ( :text, :date, :user_id)",
-            [
-                ':text' => $message,
-                ':date' => date("Y-m-d"),
-                ':user_id' => $user_id,
-            ]
-        );
+         $this->text = $message;
+         $this->date = date("Y-m-d");
+         $this->user_id = $user_id;
 
-        if ($res) {
-            return "Message sended";
-        } else {
-            return "Some error";
-        }
-    }
-
-    public static function getBlogName()
-    {
-        return 'Andrey';
-    }
+         if ($this->save()) {
+             return "Message sended";
+         } else {
+             return "Some error";
+         }
+     }
 }

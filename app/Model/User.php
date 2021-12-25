@@ -3,10 +3,38 @@ namespace App\Model;
 
 use Base\Session as Session;
 use Base\Db as DB;
-use Base\Model;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Flight;
+
+/**
+ * Class User
+ *
+ * @package App\Model
+ *
+ * @property-read $name
+ * @property-read $password
+ * @property-read $is_admin
+ * @property-read $email
+ */
 
 class User extends Model
 {
+    protected $session;
+    protected static $salt = 'yid]9e0wu]8^()97eyw';
+    protected $table = 'users';
+    protected $fillable = [
+        'name',
+        'password',
+        'is_admin',
+        'email',
+    ];
+
+    public function authUser(int $user_id)
+    {
+        $this->session = new Session();
+        $this->session->authUser($user_id);
+    }
+
     public function auth()
     {
         $user = $_POST['user'];
@@ -19,9 +47,9 @@ class User extends Model
             return "your password is small";
         }
 
-        $user_data = User::getUserByEmail($user['email']);
+        $user_data = self::getByEmail($user['email']);
 
-        if (empty($user_data) || $user_data['password'] !== $this->hash_password($user['password'])) {
+        if (empty($user_data) || $user_data['password'] !== self::hash_password($user['password'])) {
             return "incorrect user email or password";
         }
 
@@ -30,6 +58,12 @@ class User extends Model
         return "You're succesfully authorized";
     }
 
+    /**
+     * Store a new flight in the database.
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
     public function add()
     {
         $user = (array) $_POST['user'];
@@ -46,76 +80,58 @@ class User extends Model
             return "Passwords is incorrect";
         }
 
-        $db = DB::getInstance();
+        if (self::getByEmail($user['email'])) {
+            return "User with this email is already exists";
+        }
 
-        $res = $db->exec(
-            "INSERT INTO `users` (`name`, `password`, `email`, `date`) VALUES ( :users_name, :user_password, :user_email, :users_date )",
-            [
-                ':users_name' => $user['name'],
-                ':user_password' => $this->hash_password($user['password']['1']),
-                ':user_email' => $user['email'],
-                ':users_date' => date("Y-m-d"),
-            ]
-        );
+        $this->name     = $user['name'];
+        $this->password = self::hash_password($user['password'][ 1 ]);
+        $this->is_admin = '0';
+        $this->email    = $user['email'];
 
-        if (isset($res) && !empty($res)) {
+        if ($this->save()) {
             return 'Registration success. You can auth';
         }
 
         return 'Error';
     }
 
-    public static function getUserByEmail($email): array
+    public static function getByEmail($email): array
     {
-        $db = DB::getInstance();
-        $res = $db->fetchOne(
-            "SELECT `password`, `id` FROM `users` WHERE `email` = :users_email",
-            [
-                ':users_email' => $email,
-            ]
-        );
+        $res = self::query()->where('email', '=', $email)->first();//->toArray();
 
         if ($res) {
-            return $res;
+            return $res->toArray();
         } else {
             return [];
         }
     }
 
-    public static function currentUserIsAdmin()
+    public static function getById(int $id, bool $as_array = false)
     {
-        $db = DB::getInstance();
+        if ($as_array === true) {
+            return self::query()->where('id', '=', $id)->first()->toArray();
+        }
 
-        $user_id = User::getCurrentUserId();
-        $res = $db->fetchOne(
-            "SELECT `is_admin` FROM `users` WHERE `id`= :user_id",
-            [
-                ':user_id' => $user_id,
-            ]
-        );
+        return self::query()->find($id);
+    }
+
+    public static function currentUserIsAdmin(): bool
+    {
+        $user_id = self::getCurrentUserId();
+        $res = self::query()->where("id", '=', $user_id)->first()->toArray();
 
         if ($res['is_admin'] == 1) {
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
-    public static function getCurrentUser()
+    public static function getCurrentUser(): array
     {
-        $db = DB::getInstance();
-
-        $user_id = User::getCurrentUserId();
-        $sql = "SELECT * FROM `users` WHERE `id`= :user_id";
-
-        $res = $db->exec(
-            $sql,
-            [
-                ':user_id' => $user_id,
-            ]
-        );
-
-        return $res;
+        $user_id = self::getCurrentUserId();
+        return self::query()->where("id", '=', $user_id)->first()->toArray();
     }
 
     public static function getCurrentUserId()
@@ -123,18 +139,13 @@ class User extends Model
         return Session::getUserId();
     }
 
-    private function hash_password(string $password): string
+    public static function hash_password($password): string
     {
-        return sha1($password . 'yid]9e0wu]8^()97eyw');
+        return sha1($password . self::$salt);
     }
 
-    public static function isAuthorized()
+    public static function isAuthorized():bool
     {
         return Session::isAuthorized();
-    }
-
-    public static function getUserName()
-    {
-        return 'Andrey';
     }
 }

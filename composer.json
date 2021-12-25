@@ -3,6 +3,7 @@
         "psr-4": {"App\\": "app/", "Base\\": "src/"}
     },
     "require": {
-        "twig/twig": "^2.0"
+        "twig/twig": "^2.0",
+        "illuminate/database": "^8.77"
     }
 }

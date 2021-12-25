@@ -1,0 +1,19 @@
+{{ message }}
+
+<form action="{{ action }}" method="post">
+    <input type="hidden" name="id" value="{{ form.id }}">
+    <label for="username">User name</label><br>
+    <input type="text" id="username" name="username" value="{{ form.name }}"><br>
+
+    <label for="useremail">User email</label><br>
+    <input type="text" id="useremail" name="useremail" value="{{ form.email }}"><br>
+
+    {% if form.can_remove_admin == 1 %}
+        <label for="admin">User is admin</label><br>
+        <input type="checkbox" name="is_admin" id="admin" {% if form.is_admin == 1 %}checked="checked"{% endif %}><br>
+    {% endif %}
+
+    <label for="userpass">You can set new password. If you don't want to change password - stay this field empty</label><br>
+    <input type="password" name="password" id="userpass"><br>
+    <button>Update users data</button>
+</form>

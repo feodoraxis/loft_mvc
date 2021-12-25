@@ -1,17 +1,18 @@
 <?php
 namespace Base;
 
+use Exception;
 use Twig\Environment;
 use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
+use Twig\Error\RuntimeError;
 use Twig\Loader\FilesystemLoader;
 
 abstract class Controller
 {
     protected $db;
     protected $view;
-    protected $view_name;
+    protected string $view_name;
 
     public function __construct()
     {

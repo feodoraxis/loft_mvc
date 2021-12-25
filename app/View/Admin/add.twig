@@ -1,0 +1,16 @@
+{{ message }}
+
+<form action="{{ action }}" method="post">
+    <label for="username">User name</label><br>
+    <input type="text" id="username" name="username" value=""><br>
+
+    <label for="useremail">User email</label><br>
+    <input type="text" id="useremail" name="useremail" value=""><br>
+
+    <label for="admin">User is admin</label><br>
+    <input type="checkbox" name="is_admin" id="admin"><br>
+
+    <label for="userpass">You can set new password. If you don't want to change password - stay this field empty</label><br>
+    <input type="password" name="password" id="userpass"><br>
+    <button>Create user</button>
+</form>

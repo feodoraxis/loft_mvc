@@ -1,6 +1,7 @@
 <?php
 namespace Base;
-use \App\Controller;
+
+use Exception;
 
 class Application
 {
@@ -35,13 +36,15 @@ class Application
     public function addRoutes()
     {
         $this->route->addRoute('/', \App\Controller\Blog::class, 'Index');
-//        $this->route->addRoute('/blog/add', \App\Controller\Blog::class, 'Add');
-//        $this->route->addRoute('/blog/remove', \App\Controller\Blog::class, 'Remove');
-//
+
         $this->route->addRoute('/user', \App\Controller\User::class, 'Index');
         $this->route->addRoute('/user/', \App\Controller\User::class, 'Index');
         $this->route->addRoute('/user/auth', \App\Controller\User::class, 'Index');
         $this->route->addRoute('/user/registration', \App\Controller\User::class, 'Registration');
+
+        $this->route->addRoute('/admin', \App\Controller\Admin::class, 'Index');
+        $this->route->addRoute('/admin/add', \App\Controller\Admin::class, 'Add');
+        $this->route->addRoute('/admin/edit', \App\Controller\Admin::class, 'Edit');
     }
 
     private function initController()

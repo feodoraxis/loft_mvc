@@ -1,0 +1,32 @@
+{{ message }}
+
+<a href="/admin/add"><button>Create new user</button></a>
+
+<table border="1">
+    <thead>
+        <tr>
+            <td>User id</td>
+            <td>User name</td>
+            <td>User is admin</td>
+            <td></td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in users_list %}
+
+            <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.name }}</td>
+                <td>
+                    {% if item.is_admin == 1 %}
+                        User is admin
+                    {% else %}
+                        User isn't admin
+                    {% endif %}
+                </td>
+                <td><a href="/admin/edit?id={{ item.id }}">Edit user</a></td>
+            </tr>
+
+        {% endfor %}
+    </tbody>
+</table>

@@ -7,7 +7,7 @@ use App\Model\User as UserModel;
 class Blog extends Controller
 {
     protected $db;
-    protected $view_name = 'Blog';
+    protected string $view_name = 'Blog';
 
     public function Index()
     {
@@ -32,18 +32,6 @@ class Blog extends Controller
 
         $data['list'] = $blogModel->getPosts();
 
-
         return $this->render("index", $data);
-
-    }
-
-    public function addPost ()
-    {
-
-    }
-
-    public function removePost()
-    {
-
     }
 }
